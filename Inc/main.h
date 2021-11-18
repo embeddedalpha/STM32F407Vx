@@ -86,15 +86,6 @@ __STATIC_INLINE uint32_t Delay_Config(void)
 	return (0UL);                                                     /* Function successful */
 }
 
-__STATIC_INLINE uint32_t Delay_ns500(void)
-{
-
-	SysTick->LOAD = 192;
-	SysTick->VAL = 0;
-	while((SysTick->CTRL & 0x00010000) == 0);
-	return (0UL);                                                     /* Function successful */
-}
-
 
 __STATIC_INLINE uint32_t Delay_us(float us)
 {
