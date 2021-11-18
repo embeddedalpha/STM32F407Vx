@@ -1,7 +1,7 @@
 /*
  * main.h
  *
- *  Created on: Nov 2, 2021
+ *  Created on: Nov 17, 2021
  *      Author: Kunal
  */
 
@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include "stm32f407xx.h"
 #include "stm32f4xx.h"
-
 #include <stdio.h>
 #include "math.h"
 #include "inttypes.h"
@@ -23,6 +22,18 @@
 #include "system_stm32f4xx.h"
 
 
+extern uint32_t APB1CLK_SPEED;
+extern uint32_t APB2CLK_SPEED;
+
+__STATIC_INLINE int32_t SystemAPB1_Clock_Speed(void)
+{
+	return (SystemCoreClock >> APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1)>> RCC_CFGR_PPRE1_Pos]);
+}
+
+__STATIC_INLINE int32_t SystemAPB2_Clock_Speed(void)
+{
+	return (SystemCoreClock >> APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE2)>> RCC_CFGR_PPRE2_Pos]);
+}
 
 __STATIC_INLINE void MCU_Clock_Setup(void)
 {
@@ -47,7 +58,8 @@ __STATIC_INLINE void MCU_Clock_Setup(void)
 	RCC -> CFGR |= RCC_CFGR_SW_PLL;
 	while((RCC -> CFGR & RCC_CFGR_SWS_PLL) != RCC_CFGR_SWS_PLL);
 	SystemCoreClockUpdate();
-//	SysTick_Config(SystemCoreClock/168);
+	SysTick_Config(SystemCoreClock/168);
+	RCC -> APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 }
 
 
@@ -70,7 +82,7 @@ __STATIC_INLINE uint32_t Delay_Config(void)
 	SysTick->CTRL = 0;
 	SysTick->LOAD = 0x00FFFFFF;
 	SysTick->VAL = 0;
-	SysTick->CTRL |= 7;
+	SysTick->CTRL = 5;
 	return (0UL);                                                     /* Function successful */
 }
 
@@ -87,16 +99,16 @@ __STATIC_INLINE uint32_t Delay_ns500(void)
 __STATIC_INLINE uint32_t Delay_us(float us)
 {
 
-	SysTick->LOAD = (SystemCoreClock / 1000000) * us;
+	SysTick->LOAD = 0xA8 * us;
 	SysTick->VAL = 0;
 	while((SysTick->CTRL & 0x00010000) == 0);
 	return (0UL);                                                     /* Function successful */
 }
 
-__STATIC_INLINE uint32_t Delay_ms(unsigned long ms)
+__STATIC_INLINE uint32_t Delay_ms(int ms)
 {
-	unsigned long x = SystemCoreClock / (1000 * ms);
-	SysTick->LOAD = x ;
+	unsigned long x =0x29040 * (ms);
+	SysTick->LOAD =  x ;
 	SysTick->VAL = 0;
 	SysTick->CTRL |= 1;
 	while((SysTick->CTRL & 0x00010000) == 0);
