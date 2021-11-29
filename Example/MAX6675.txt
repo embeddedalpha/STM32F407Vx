@@ -1,0 +1,31 @@
+#include <stdint.h>
+
+#include "main.h"
+#include "GPIO/GPIO.h"
+#include "Console/Console.h"
+#include "MAX6675/MAX6675.h"
+
+
+
+int main(void)
+{
+int temperature_1, temperature_2;
+
+	MCU_Clock_Setup();
+	Delay_Config();
+	Console_Init(USART1, 9600);
+
+	MAX6675_Init_1(SPI1, GPIOC, 0);
+	MAX6675_Init_2(SPI2, GPIOC, 1);
+
+	for(;;)
+	{
+		temperature_1 = (int)MAX6675_Get_Celcius_Temperature_1();
+		temperature_2 = (int)MAX6675_Get_Celcius_Temperature_2();
+		printConsole(USART1, "Temperature Sensor 1: %d\r\n",temperature_1);
+		printConsole(USART1, "Temperature Sensor 2: %d\r\n",temperature_2);
+	}
+}
+
+
+
